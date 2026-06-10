@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Attendance Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>📊 Web Attendance Tracker</h1>
+                <p>Track class attendance efficiently with AI insights</p>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-content">
+                <button class="nav-btn active" data-tab="dashboard">📈 Dashboard</button>
+                <button class="nav-btn" data-tab="add-record">➕ Add Record</button>
+                <button class="nav-btn" data-tab="records">📋 Records</button>
+                <button class="nav-btn" data-tab="predictions">🤖 AI Predictions</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Tab -->
+            <section id="dashboard" class="tab-content active">
+                <h2>Dashboard</h2>
+                <div class="stats-container" id="statsContainer">
+                    <div class="stat-card">
+                        <h3>Total Records</h3>
+                        <p class="stat-value" id="statTotal">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Present</h3>
+                        <p class="stat-value present" id="statPresent">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Absent</h3>
+                        <p class="stat-value absent" id="statAbsent">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Attendance Rate</h3>
+                        <p class="stat-value" id="statRate">0%</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Add Attendance Form -->
+            <section id="add-record" class="tab-content">
+                <h2>Add Attendance Record</h2>
+                <form id="attendanceForm" class="attendance-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentName">Student Name *</label>
+                            <input 
+                                type="text" 
+                                id="studentName" 
+                                required
+                                placeholder="Enter student name"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="className">Class Name *</label>
+                            <input 
+                                type="text" 
+                                id="className" 
+                                required
+                                placeholder="Enter class name"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date">Date *</label>
+                            <input 
+                                type="date" 
+                                id="date" 
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status *</label>
+                            <select id="status" required>
+                                <option value="present">Present</option>
+                                <option value="absent">Absent</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="timeIn">Time In</label>
+                            <input type="time" id="timeIn">
+                        </div>
+                        <div class="form-group">
+                            <label for="timeOut">Time Out</label>
+                            <input type="time" id="timeOut">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="notes">Notes</label>
+                            <textarea id="notes" placeholder="Add any notes..."></textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">✅ Add Record</button>
+                </form>
+                <div id="formMessage" class="message"></div>
+            </section>
+
+            <!-- Records Tab -->
+            <section id="records" class="tab-content">
+                <h2>Attendance Records</h2>
+                
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <h3>Search & Filter</h3>
+                    <div class="filter-controls">
+                        <input 
+                            type="text" 
+                            id="filterStudent" 
+                            placeholder="Search by student name"
+                            class="filter-input"
+                        >
+                        <input 
+                            type="text" 
+                            id="filterClass" 
+                            placeholder="Filter by class name"
+                            class="filter-input"
+                        >
+                        <input 
+                            type="date" 
+                            id="filterDate"
+                            class="filter-input"
+                        >
+                        <select id="filterStatus" class="filter-input">
+                            <option value="">All Status</option>
+                            <option value="present">Present</option>
+                            <option value="absent">Absent</option>
+                        </select>
+                        <button id="resetFilters" class="btn btn-secondary">🔄 Reset</button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-wrapper">
+                    <table id="attendanceTable" class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Time In</th>
+                                <th>Time Out</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr class="empty-row">
+                                <td colspan="8">No records found.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- AI Predictions Tab -->
+            <section id="predictions" class="tab-content">
+                <h2>🤖 AI Attendance Predictions</h2>
+                <p>AI-powered predictions for future attendance patterns.</p>
+                <div id="predictionsContainer" class="predictions-container">
+                    <p>Loading predictions...</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModal">&times;</span>
+            <h2>Edit Attendance Record</h2>
+            <form id="editForm" class="attendance-form">
+                <input type="hidden" id="editId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editStudentName">Student Name</label>
+                        <input type="text" id="editStudentName">
+                    </div>
+                    <div class="form-group">
+                        <label for="editClassName">Class Name</label>
+                        <input type="text" id="editClassName">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editDate">Date</label>
+                        <input type="date" id="editDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="editStatus">Status</label>
+                        <select id="editStatus">
+                            <option value="present">Present</option>
+                            <option value="absent">Absent</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editTimeIn">Time In</label>
+                        <input type="time" id="editTimeIn">
+                    </div>
+                    <div class="form-group">
+                        <label for="editTimeOut">Time Out</label>
+                        <input type="time" id="editTimeOut">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+                    <button type="button" class="btn btn-secondary" id="cancelEdit">❌ Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

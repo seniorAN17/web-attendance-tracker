@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: attendance-postgres
+    environment:
+      POSTGRES_USER: attendance_user
+      POSTGRES_PASSWORD: secure_password_here
+      POSTGRES_DB: attendance_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U attendance_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - attendance-network
+
+  # Python FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: attendance-backend
+    environment:
+      DATABASE_URL: postgresql://attendance_user:secure_password_here@postgres:5432/attendance_db
+      FASTAPI_ENV: development
+      FASTAPI_DEBUG: "True"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - attendance-network
+    command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Go Microservice
+  go-service:
+    build:
+      context: ./go-service
+      dockerfile: Dockerfile
+    container_name: attendance-go-service
+    ports:
+      - "8080:8080"
+    networks:
+      - attendance-network
+    environment:
+      - BACKEND_URL=http://backend:8000
+
+  # Frontend (served via nginx or simple server)
+  frontend:
+    image: nginx:alpine
+    container_name: attendance-frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    networks:
+      - attendance-network
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  attendance-network:
+    driver: bridge
